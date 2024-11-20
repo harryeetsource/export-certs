@@ -20,10 +20,17 @@ foreach ($location in $locations) {
 
         foreach ($cert in $certificates) {
             try {
-                # Create a filename based on the store and certificate thumbprint
+                # Extract the certificate's thumbprint and subject name
                 $certThumbprint = $cert.Thumbprint
-                $certSubject = $cert.Subject -replace '[^a-zA-Z0-9]', '_'
-                $outputFileName = "${storeName}_${certThumbprint}.der"
+                $certSubject = $cert.Subject -replace '[^a-zA-Z0-9]', '_' # Replace special characters with '_'
+
+                # Limit the subject length to avoid overly long file names
+                if ($certSubject.Length -gt 50) {
+                    $certSubject = $certSubject.Substring(0, 50)
+                }
+
+                # Create a filename based on the store name, certificate thumbprint, and subject
+                $outputFileName = "${storeName}_${certThumbprint}_${certSubject}.der"
                 $outputFilePath = Join-Path -Path $outputDir -ChildPath $outputFileName
 
                 # Export the certificate as a DER encoded file
